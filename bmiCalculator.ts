@@ -44,5 +44,9 @@ const calculateBmi = (height: number, weight: number): string => {
   return "Something went wrong with calculation";
 };
 
-const { height, weight }: BmiValues = parseArguments(process.argv);
-console.log(calculateBmi(height, weight));
+if (require.main === module) {
+  const { height, weight }: BmiValues = parseArguments(process.argv);
+  console.log(calculateBmi(height, weight));
+}
+
+export default calculateBmi;
