@@ -1,3 +1,4 @@
+import { isANumber } from "./helper";
 interface Result {
   periodLength: number;
   trainingDays: number;
@@ -8,7 +9,14 @@ interface Result {
   average: number;
 }
 
-type rating = 1 | 2 | 3;
+const parseArguments = (args: string[]) => {
+  const isValid = args.slice(2).every((n) => isANumber(n));
+  if (isValid) {
+    return args.slice(2).map((n) => Number(n));
+  } else {
+    throw new Error("Arguments must all be numbers [target] [hours...]");
+  }
+};
 
 const calculateExercises = (hours: number[], target: number): Result => {
   const average = hours.reduce((a, c) => a + c, 0) / hours.length;
@@ -47,4 +55,5 @@ const calculateExercises = (hours: number[], target: number): Result => {
   };
 };
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+const args: number[] = parseArguments(process.argv);
+console.log(calculateExercises(args.slice(1), args[0]));
