@@ -22,6 +22,7 @@ const parseArguments = (args: string[]): BmiValues => {
 };
 
 /**
+ * Calculates bmi based on height and weight
  * @param height in centimeters
  * @param weight in kilograms
  * @returns string
