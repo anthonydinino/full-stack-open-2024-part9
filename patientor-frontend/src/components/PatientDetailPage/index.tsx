@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import patientService from "../../services/patients";
-import { Gender, Patient } from "../../types";
+import diagnosesService from "../../services/diagnoses";
+import { Diagnosis, Gender, Patient } from "../../types";
 import { Avatar, Card, Container, Typography } from "@mui/material";
 import FemaleIcon from "@mui/icons-material/Female";
 import MaleIcon from "@mui/icons-material/Male";
@@ -11,11 +12,13 @@ const PatientDetailPage = () => {
   const params = useParams();
 
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [diagnosesInfo, setDiagnosesInfo] = useState<Diagnosis[] | null>(null);
 
   useEffect(() => {
     patientService.getOne(params.id || "").then((data) => {
       setPatient(data);
     });
+    diagnosesService.getDiagnosesInfo().then((data) => setDiagnosesInfo(data));
   }, [params.id]);
 
   const getGenderIcon = (gender: Gender) => {
@@ -29,11 +32,18 @@ const PatientDetailPage = () => {
     }
   };
 
+  const getDiagnosisInformation = (code: string) => {
+    try {
+      return diagnosesInfo?.find((d) => d.code === code)?.name ?? "";
+    } catch (error) {
+      return "";
+    }
+  };
+
   if (!patient) {
     return <p>There is nothing here...</p>;
   }
 
-  console.log(patient.entries);
   return (
     <Card sx={{ padding: "1em", marginTop: "1rem" }}>
       <Container sx={{ display: "flex" }}>
@@ -60,7 +70,7 @@ const PatientDetailPage = () => {
               </p>
               <ul>
                 {entry.diagnosisCodes?.map((c) => (
-                  <li key={c}>{c}</li>
+                  <li key={c}>{c + " " + getDiagnosisInformation(c)}</li>
                 ))}
               </ul>
             </article>
