@@ -2,6 +2,7 @@ import { ChangeEvent, SyntheticEvent, Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import diaryService from "../../services/diaryService";
 import { DiaryEntry } from "../types";
+import axios from "axios";
 
 interface DiaryFormProps {
   setEntries: Dispatch<SetStateAction<DiaryEntry[]>>;
@@ -9,6 +10,7 @@ interface DiaryFormProps {
 }
 
 const DiaryEntryForm = ({ setEntries, entries }: DiaryFormProps) => {
+  const [errorMsg, setErrorMsg] = useState<string>("");
   const [formData, setFormData] = useState({
     date: "",
     visibility: "",
@@ -18,9 +20,18 @@ const DiaryEntryForm = ({ setEntries, entries }: DiaryFormProps) => {
 
   const addDiaryEntry = async (e: SyntheticEvent) => {
     e.preventDefault();
-    const newEntry = await diaryService.createDiaryEntry(formData);
-    setEntries(entries.concat(newEntry));
-    setFormData({ date: "", visibility: "", weather: "", comment: "" });
+    try {
+      const newEntry = await diaryService.createDiaryEntry(formData);
+      setEntries(entries.concat(newEntry));
+      setFormData({ date: "", visibility: "", weather: "", comment: "" });
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErrorMsg(error.response?.data);
+        setTimeout(() => setErrorMsg(""), 5000);
+      } else {
+        console.error(error);
+      }
+    }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -33,6 +44,7 @@ const DiaryEntryForm = ({ setEntries, entries }: DiaryFormProps) => {
   return (
     <>
       <h2>Add new entry</h2>
+      <p style={{ color: "red" }}>{errorMsg}</p>
       <form onSubmit={addDiaryEntry}>
         <label htmlFor="date">date</label>
         <input
