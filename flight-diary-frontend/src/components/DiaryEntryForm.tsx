@@ -1,7 +1,7 @@
 import { ChangeEvent, SyntheticEvent, Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import diaryService from "../../services/diaryService";
-import { DiaryEntry } from "../types";
+import { DiaryEntry, Visibility, Weather } from "../types";
 import axios from "axios";
 
 interface DiaryFormProps {
@@ -23,7 +23,7 @@ const DiaryEntryForm = ({ setEntries, entries }: DiaryFormProps) => {
     try {
       const newEntry = await diaryService.createDiaryEntry(formData);
       setEntries(entries.concat(newEntry));
-      setFormData({ date: "", visibility: "", weather: "", comment: "" });
+      setFormData({ ...formData, date: "", comment: "" });
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         setErrorMsg(error.response?.data);
@@ -49,26 +49,54 @@ const DiaryEntryForm = ({ setEntries, entries }: DiaryFormProps) => {
         <label htmlFor="date">date</label>
         <input
           id="date"
+          type="date"
           name="date"
           value={formData.date}
           onChange={handleChange}
         />
         <br />
-        <label htmlFor="visibility">visibility</label>
-        <input
-          id="visibility"
-          name="visibility"
-          value={formData.visibility}
-          onChange={handleChange}
-        />
-        <br />
-        <label htmlFor="weather">weather</label>
-        <input
-          id="weather"
-          name="weather"
-          value={formData.weather}
-          onChange={handleChange}
-        />
+        <fieldset
+          style={{ marginTop: "1rem", display: "flex", alignItems: "center" }}
+        >
+          <b style={{ marginRight: "1rem" }}>visibility</b>
+          {Object.values(Visibility)
+            .map((v) => v.toString())
+            .map((v) => (
+              <div key={v}>
+                <label style={{ marginLeft: "0.5rem" }} htmlFor={v}>
+                  {v}
+                </label>
+                <input
+                  type="radio"
+                  name="visibility"
+                  id={v}
+                  value={v}
+                  onChange={handleChange}
+                />
+              </div>
+            ))}
+        </fieldset>
+        <fieldset
+          style={{ marginTop: "1rem", display: "flex", alignItems: "center" }}
+        >
+          <b style={{ marginRight: "1rem" }}>weather</b>
+          {Object.values(Weather)
+            .map((w) => w.toString())
+            .map((w) => (
+              <div key={w}>
+                <label style={{ marginLeft: "0.5rem" }} htmlFor={w}>
+                  {w}
+                </label>
+                <input
+                  type="radio"
+                  name="weather"
+                  id={w}
+                  value={w}
+                  onChange={handleChange}
+                />
+              </div>
+            ))}
+        </fieldset>
         <br />
         <label htmlFor="comment">comment</label>
         <input
