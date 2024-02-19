@@ -29,12 +29,11 @@ const PatientDetailPage = () => {
     }
   };
 
-  console.log(patient);
-
   if (!patient) {
     return <p>There is nothing here...</p>;
   }
 
+  console.log(patient.entries);
   return (
     <Card sx={{ padding: "1em", marginTop: "1rem" }}>
       <Container sx={{ display: "flex" }}>
@@ -48,6 +47,25 @@ const PatientDetailPage = () => {
         <p>DOB: {patient.dateOfBirth}</p>
         <p>ssn: {patient.ssn}</p>
         <p>occupation: {patient.occupation}</p>
+      </Container>
+      <Container>
+        <Typography variant="h5" component="h5">
+          entries
+        </Typography>
+        {patient.entries.map((entry) => {
+          return (
+            <article key={entry.id}>
+              <p>
+                {entry.date} <i>{entry.description}</i>
+              </p>
+              <ul>
+                {entry.diagnosisCodes?.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+            </article>
+          );
+        })}
       </Container>
     </Card>
   );
