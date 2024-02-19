@@ -1,4 +1,4 @@
-import { Entry, Gender, NewPatient } from "./types";
+import { Entry, EntryType, Gender, NewPatient } from "./types";
 
 export const toNewPatient = (obj: unknown): NewPatient => {
   if (!obj || typeof obj !== "object") {
@@ -9,7 +9,8 @@ export const toNewPatient = (obj: unknown): NewPatient => {
     "dateOfBirth" in obj &&
     "ssn" in obj &&
     "gender" in obj &&
-    "occupation" in obj
+    "occupation" in obj &&
+    "entries" in obj
   ) {
     const newPatient: NewPatient = {
       name: parseName(obj.name),
@@ -17,7 +18,7 @@ export const toNewPatient = (obj: unknown): NewPatient => {
       ssn: parseSsn(obj.ssn),
       gender: parseGender(obj.gender),
       occupation: parseOccupation(obj.occupation),
-      entries: [] as Entry[],
+      entries: parseEntries(obj.entries),
     };
     return newPatient;
   }
@@ -26,6 +27,23 @@ export const toNewPatient = (obj: unknown): NewPatient => {
 
 const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
+};
+
+const hasEntryType = (entry: Entry): entry is Entry =>
+  Boolean(
+    entry.type &&
+      isString(entry.type) &&
+      Object.values(EntryType)
+        .map((e) => e.toString())
+        .includes(entry.type)
+  );
+
+const parseEntries = (entries: unknown): Entry[] => {
+  // Just check if type exists and is correct
+  const entryArr = entries as Entry[];
+  if (entryArr.some((e: Entry) => !hasEntryType(e))) {
+    throw new Error("Missing or wrong type on entry");
+  } else return entryArr;
 };
 
 const parseName = (name: unknown): string => {
