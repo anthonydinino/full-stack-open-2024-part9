@@ -9,6 +9,10 @@ router.get("/", (_req, res) => {
   res.json(patientsService.getNonSensistivePatients());
 });
 
+router.get("/:id", (req, res) => {
+  res.json(patientsService.getPatient(req.params.id));
+});
+
 router.post("/", (req, res) => {
   try {
     const newPatient: NewPatient = toNewPatient(req.body);

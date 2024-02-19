@@ -1,4 +1,4 @@
-import { Gender, NewPatient } from "./types";
+import { Entry, Gender, NewPatient } from "./types";
 
 export const toNewPatient = (obj: unknown): NewPatient => {
   if (!obj || typeof obj !== "object") {
@@ -17,6 +17,7 @@ export const toNewPatient = (obj: unknown): NewPatient => {
       ssn: parseSsn(obj.ssn),
       gender: parseGender(obj.gender),
       occupation: parseOccupation(obj.occupation),
+      entries: [] as Entry[],
     };
     return newPatient;
   }
