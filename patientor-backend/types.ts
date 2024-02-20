@@ -25,12 +25,12 @@ export enum EntryType {
   Hospital = "Hospital",
 }
 
-interface SickLeave {
+export interface SickLeave {
   startDate: string;
   endDate: string;
 }
 
-interface Discharge {
+export interface Discharge {
   date: string;
   criteria: string;
 }
@@ -54,6 +54,14 @@ export type Entry =
   | HealthCheckEntry
   | HospitalEntry
   | OccupationalHealthCareEntry;
+
+// Define special omit for unions
+type UnionOmit<T, K extends string | number | symbol> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+// Define Entry without the 'id' property
+export type NewEntry = UnionOmit<Entry, "id">;
 
 export interface Patient {
   id: string;

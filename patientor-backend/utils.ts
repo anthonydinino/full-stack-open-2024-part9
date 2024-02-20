@@ -1,4 +1,14 @@
-import { Entry, EntryType, Gender, NewPatient } from "./types";
+import {
+  Entry,
+  EntryType,
+  Gender,
+  NewEntry,
+  NewPatient,
+  Diagnosis,
+  HealthCheckRating,
+  Discharge,
+  SickLeave,
+} from "./types";
 
 export const toNewPatient = (obj: unknown): NewPatient => {
   if (!obj || typeof obj !== "object") {
@@ -13,9 +23,9 @@ export const toNewPatient = (obj: unknown): NewPatient => {
     "entries" in obj
   ) {
     const newPatient: NewPatient = {
-      name: parseName(obj.name),
-      dateOfBirth: parseDob(obj.dateOfBirth),
-      ssn: parseSsn(obj.ssn),
+      name: parseString(obj.name, "name"),
+      dateOfBirth: parseString(obj.dateOfBirth, "dateOfBirth"),
+      ssn: parseString(obj.ssn, "ssn"),
       gender: parseGender(obj.gender),
       occupation: parseOccupation(obj.occupation),
       entries: parseEntries(obj.entries),
@@ -25,8 +35,105 @@ export const toNewPatient = (obj: unknown): NewPatient => {
   throw new Error("Incorrect data: some fields are missing");
 };
 
+export const toNewEntry = (obj: unknown): NewEntry => {
+  if (!obj || typeof obj !== "object" || !("type" in obj)) {
+    throw new Error("Incorrect or missing data");
+  }
+
+  const typedObj = obj as NewEntry;
+
+  switch (typedObj.type) {
+    case EntryType.Hospital:
+      return {
+        type: typedObj.type,
+        description: parseString(typedObj.description, "description"),
+        date: parseString(typedObj.date, "date"),
+        specialist: parseString(typedObj.specialist, "specialist"),
+        diagnosisCodes: parseDiagnosisCodes(typedObj.diagnosisCodes),
+        discharge: parseDischarge(typedObj.discharge),
+      };
+    case EntryType.OccupationalHealthCare:
+      return {
+        type: typedObj.type,
+        description: parseString(typedObj.description, "description"),
+        date: parseString(typedObj.date, "date"),
+        specialist: parseString(typedObj.specialist, "specialist"),
+        diagnosisCodes: parseDiagnosisCodes(typedObj.diagnosisCodes),
+        employerName: parseString(typedObj.employerName, "employerName"),
+        sickLeave: parseSickLeave(typedObj.sickLeave),
+      };
+    case EntryType.HealthCheck:
+      return {
+        type: typedObj.type,
+        description: parseString(typedObj.description, "description"),
+        date: parseString(typedObj.date, "date"),
+        specialist: parseString(typedObj.specialist, "specialist"),
+        diagnosisCodes: parseDiagnosisCodes(typedObj.diagnosisCodes),
+        healthCheckRating: parseHealthCheckRating(typedObj.healthCheckRating),
+      };
+    default:
+      assertNever(typedObj);
+  }
+  throw new Error("Something bad happened");
+};
+
 const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
+};
+
+const parseDischarge = (object: unknown): Discharge => {
+  if (
+    object &&
+    typeof object === "object" &&
+    "date" in object &&
+    "criteria" in object &&
+    isString(object.date) &&
+    isString(object.criteria)
+  ) {
+    return object as Discharge;
+  } else {
+    throw new Error(
+      "Value of discharge missing or incorrect " + JSON.stringify(object)
+    );
+  }
+};
+
+const parseSickLeave = (object: unknown): SickLeave => {
+  if (
+    object &&
+    typeof object === "object" &&
+    "startDate" in object &&
+    "endDate" in object &&
+    isString(object.startDate) &&
+    isString(object.endDate)
+  ) {
+    return object as SickLeave;
+  } else {
+    throw new Error(
+      "Value of sickLeave missing or incorrect " + JSON.stringify(object)
+    );
+  }
+};
+
+const parseHealthCheckRating = (object: unknown): HealthCheckRating => {
+  switch (object) {
+    case HealthCheckRating.Healthy:
+    case HealthCheckRating.LowRisk:
+    case HealthCheckRating.HighRisk:
+    case HealthCheckRating.CriticalRisk:
+      return object;
+    default:
+      throw new Error("Value of healthCheckRating incorrect: " + object);
+  }
+};
+
+const parseDiagnosisCodes = (object: unknown): Array<Diagnosis["code"]> => {
+  if (!object || typeof object !== "object" || !("diagnosisCodes" in object)) {
+    // we will just trust the data to be in correct form
+    return [] as Array<Diagnosis["code"]>;
+  }
+
+  return object.diagnosisCodes as Array<Diagnosis["code"]>;
 };
 
 const hasEntryType = (entry: Entry): entry is Entry =>
@@ -46,25 +153,11 @@ const parseEntries = (entries: unknown): Entry[] => {
   } else return entryArr;
 };
 
-const parseName = (name: unknown): string => {
+const parseString = (name: unknown, field: string): string => {
   if (!isString(name)) {
-    throw new Error("Incorrect or missing name");
+    throw new Error("Incorrect or missing " + field);
   }
   return name;
-};
-
-const parseDob = (dob: unknown): string => {
-  if (!isString(dob)) {
-    throw new Error("Incorrect or missing DOB");
-  }
-  return dob;
-};
-
-const parseSsn = (ssn: unknown): string => {
-  if (!isString(ssn)) {
-    throw new Error("Incorrect or missing SSN");
-  }
-  return ssn;
 };
 
 const isGender = (param: string): param is Gender => {
@@ -85,6 +178,12 @@ const parseOccupation = (occupation: unknown): string => {
     throw new Error("Incorrect or missing occupation");
   }
   return occupation;
+};
+
+const assertNever = (value: never): never => {
+  throw new Error(
+    `Unhandled discriminated union member: ${JSON.stringify(value)}`
+  );
 };
 
 export default toNewPatient;
