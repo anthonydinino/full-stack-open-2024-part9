@@ -25,15 +25,28 @@ export enum EntryType {
   Hospital = "Hospital",
 }
 
+interface SickLeave {
+  startDate: string;
+  endDate: string;
+}
+
+interface Discharge {
+  date: string;
+  criteria: string;
+}
+
 interface HealthCheckEntry extends BaseEntry {
   type: EntryType.HealthCheck;
   healthCheckRating: HealthCheckRating;
 }
 
 interface OccupationalHealthCareEntry extends BaseEntry {
+  employerName: string;
+  sickLeave: SickLeave;
   type: EntryType.OccupationalHealthCare;
 }
 interface HospitalEntry extends BaseEntry {
+  discharge: Discharge;
   type: EntryType.Hospital;
 }
 

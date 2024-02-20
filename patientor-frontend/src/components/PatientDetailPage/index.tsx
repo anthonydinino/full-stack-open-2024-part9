@@ -7,6 +7,7 @@ import { Avatar, Card, Container, Typography } from "@mui/material";
 import FemaleIcon from "@mui/icons-material/Female";
 import MaleIcon from "@mui/icons-material/Male";
 import AccessibilityIcon from "@mui/icons-material/Accessibility";
+import EntryDetails from "./EntryDetails";
 
 const PatientDetailPage = () => {
   const params = useParams();
@@ -32,14 +33,6 @@ const PatientDetailPage = () => {
     }
   };
 
-  const getDiagnosisInformation = (code: string) => {
-    try {
-      return diagnosesInfo?.find((d) => d.code === code)?.name ?? "";
-    } catch (error) {
-      return "";
-    }
-  };
-
   if (!patient) {
     return <p>There is nothing here...</p>;
   }
@@ -62,20 +55,19 @@ const PatientDetailPage = () => {
         <Typography variant="h5" component="h5">
           entries
         </Typography>
-        {patient.entries.map((entry) => {
-          return (
-            <article key={entry.id}>
-              <p>
-                {entry.date} <i>{entry.description}</i>
-              </p>
-              <ul>
-                {entry.diagnosisCodes?.map((c) => (
-                  <li key={c}>{c + " " + getDiagnosisInformation(c)}</li>
-                ))}
-              </ul>
-            </article>
-          );
-        })}
+        {patient?.entries?.length > 0 && patient.entries ? (
+          patient?.entries.map((entry) => {
+            return (
+              <EntryDetails
+                key={entry.id}
+                entry={entry}
+                diagnosesInfo={diagnosesInfo}
+              />
+            );
+          })
+        ) : (
+          <p>No entries...</p>
+        )}
       </Container>
     </Card>
   );
