@@ -8,6 +8,7 @@ import FemaleIcon from "@mui/icons-material/Female";
 import MaleIcon from "@mui/icons-material/Male";
 import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import EntryDetails from "./EntryDetails";
+import HealthCheckForm from "./HealthCheckForm";
 
 const PatientDetailPage = () => {
   const params = useParams();
@@ -33,7 +34,7 @@ const PatientDetailPage = () => {
     }
   };
 
-  if (!patient) {
+  if (!patient || !params.id) {
     return <p>There is nothing here...</p>;
   }
 
@@ -51,6 +52,11 @@ const PatientDetailPage = () => {
         <p>ssn: {patient.ssn}</p>
         <p>occupation: {patient.occupation}</p>
       </Container>
+      <HealthCheckForm
+        id={params.id}
+        patient={patient}
+        setPatient={setPatient}
+      />
       <Container>
         <Typography variant="h5" component="h5">
           entries

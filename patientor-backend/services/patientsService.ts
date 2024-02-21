@@ -1,4 +1,10 @@
-import { NewEntry, NewPatient, NonSensitivePatient, Patient } from "../types";
+import {
+  Entry,
+  NewEntry,
+  NewPatient,
+  NonSensitivePatient,
+  Patient,
+} from "../types";
 import data from "../data/patients";
 import { v1 as uuid } from "uuid";
 
@@ -31,7 +37,7 @@ const addPatient = (patient: NewPatient): NewPatient => {
   return newPatient;
 };
 
-const addEntry = (entry: NewEntry, id: string): NewEntry => {
+const addEntry = (entry: NewEntry, id: string): Entry => {
   const newEntry = {
     id: uuid(),
     ...entry,

@@ -42,33 +42,31 @@ export const toNewEntry = (obj: unknown): NewEntry => {
 
   const typedObj = obj as NewEntry;
 
+  const baseEntry = {
+    description: parseString(typedObj.description, "description"),
+    date: parseString(typedObj.date, "date"),
+    specialist: parseString(typedObj.specialist, "specialist"),
+    diagnosisCodes: parseDiagnosisCodes(typedObj.diagnosisCodes),
+  };
+
   switch (typedObj.type) {
     case EntryType.Hospital:
       return {
+        ...baseEntry,
         type: typedObj.type,
-        description: parseString(typedObj.description, "description"),
-        date: parseString(typedObj.date, "date"),
-        specialist: parseString(typedObj.specialist, "specialist"),
-        diagnosisCodes: parseDiagnosisCodes(typedObj.diagnosisCodes),
         discharge: parseDischarge(typedObj.discharge),
       };
     case EntryType.OccupationalHealthCare:
       return {
+        ...baseEntry,
         type: typedObj.type,
-        description: parseString(typedObj.description, "description"),
-        date: parseString(typedObj.date, "date"),
-        specialist: parseString(typedObj.specialist, "specialist"),
-        diagnosisCodes: parseDiagnosisCodes(typedObj.diagnosisCodes),
         employerName: parseString(typedObj.employerName, "employerName"),
         sickLeave: parseSickLeave(typedObj.sickLeave),
       };
     case EntryType.HealthCheck:
       return {
+        ...baseEntry,
         type: typedObj.type,
-        description: parseString(typedObj.description, "description"),
-        date: parseString(typedObj.date, "date"),
-        specialist: parseString(typedObj.specialist, "specialist"),
-        diagnosisCodes: parseDiagnosisCodes(typedObj.diagnosisCodes),
         healthCheckRating: parseHealthCheckRating(typedObj.healthCheckRating),
       };
     default:
@@ -78,7 +76,7 @@ export const toNewEntry = (obj: unknown): NewEntry => {
 };
 
 const isString = (text: unknown): text is string => {
-  return typeof text === "string" || text instanceof String;
+  return (typeof text === "string" || text instanceof String) && Boolean(text);
 };
 
 const parseDischarge = (object: unknown): Discharge => {
@@ -128,12 +126,8 @@ const parseHealthCheckRating = (object: unknown): HealthCheckRating => {
 };
 
 const parseDiagnosisCodes = (object: unknown): Array<Diagnosis["code"]> => {
-  if (!object || typeof object !== "object" || !("diagnosisCodes" in object)) {
-    // we will just trust the data to be in correct form
-    return [] as Array<Diagnosis["code"]>;
-  }
-
-  return object.diagnosisCodes as Array<Diagnosis["code"]>;
+  if (!Array.isArray(object)) return [] as Array<Diagnosis["code"]>;
+  return object as Array<Diagnosis["code"]>;
 };
 
 const hasEntryType = (entry: Entry): entry is Entry =>
