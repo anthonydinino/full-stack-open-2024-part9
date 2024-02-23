@@ -6,15 +6,17 @@ import {
   SyntheticEvent,
   useState,
 } from "react";
-import { Entry, EntryType, Patient } from "../../types";
+import { Diagnosis, Entry, EntryType, Patient } from "../../types";
 import patientService from "../../services/patients";
 import axios, { AxiosError } from "axios";
+import DiagnosisCodeSelect from "./DiagnosisCodeSelect";
 
 interface OccupationHealthProps {
   id: Entry["id"];
   patient: Patient;
   setPatient: Dispatch<SetStateAction<Patient | null>>;
   setErrorMsg: Dispatch<SetStateAction<string>>;
+  diagnosesInfo: Diagnosis[] | null;
 }
 
 const OccupationHealth = ({
@@ -22,6 +24,7 @@ const OccupationHealth = ({
   patient,
   setPatient,
   setErrorMsg,
+  diagnosesInfo,
 }: OccupationHealthProps) => {
   const initialFormState = {
     occupation: patient.occupation || "",
@@ -29,11 +32,13 @@ const OccupationHealth = ({
     description: "",
     date: "",
     specialist: "",
-    diagnosisCodes: "",
     sickLeaveStart: "",
     sickLeaveEnd: "",
   };
   const [formData, setFormData] = useState(initialFormState);
+  const [diagnosisCodes, setDiagnosisCodes] = useState<
+    Array<Diagnosis["code"]>
+  >([]);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -44,9 +49,7 @@ const OccupationHealth = ({
           type: EntryType.OccupationalHealthCare,
           occupation: formData.occupation,
           employerName: formData.employeeName,
-          diagnosisCodes: formData.diagnosisCodes
-            ? formData.diagnosisCodes?.split(",").map((c) => c.trim())
-            : [],
+          diagnosisCodes,
           sickLeave: {
             startDate: formData.sickLeaveStart,
             endDate: formData.sickLeaveEnd,
@@ -126,12 +129,10 @@ const OccupationHealth = ({
               label="Specialist"
               variant="standard"
             />
-            <TextField
-              onChange={handleChange}
-              name="diagnosisCodes"
-              value={formData.diagnosisCodes}
-              label="Diagnosis Codes"
-              variant="standard"
+            <DiagnosisCodeSelect
+              diagnosesInfo={diagnosesInfo || []}
+              diagnosisCodes={diagnosisCodes}
+              setDiagnosisCodes={setDiagnosisCodes}
             />
             <h4>Sick Leave</h4>
             <p>Sick Leave Start Date:</p>
@@ -157,7 +158,10 @@ const OccupationHealth = ({
               </Button>
               <Button
                 variant="contained"
-                onClick={() => setFormData(initialFormState)}
+                onClick={() => {
+                  setFormData(initialFormState);
+                  setDiagnosisCodes([]);
+                }}
                 color="error"
               >
                 Cancel

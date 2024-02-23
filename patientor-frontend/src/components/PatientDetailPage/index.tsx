@@ -6,6 +6,7 @@ import { Diagnosis, EntryType, Gender, Patient } from "../../types";
 import {
   Alert,
   Avatar,
+  Box,
   Button,
   Card,
   Container,
@@ -24,7 +25,6 @@ const PatientDetailPage = () => {
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [diagnosesInfo, setDiagnosesInfo] = useState<Diagnosis[] | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string>("");
 
   useEffect(() => {
     patientService.getOne(params.id || "").then((data) => {
@@ -62,12 +62,12 @@ const PatientDetailPage = () => {
         <p>ssn: {patient.ssn}</p>
         <p>occupation: {patient.occupation}</p>
       </Container>
-      {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
       <FormSelection
         id={params.id}
         patient={patient}
+        diagnosesInfo={diagnosesInfo}
         setPatient={setPatient}
-        setErrorMsg={setErrorMsg}
       />
       <Container>
         <Typography variant="h5" component="h5">
@@ -94,15 +94,16 @@ const PatientDetailPage = () => {
 const FormSelection = ({
   id,
   patient,
+  diagnosesInfo,
   setPatient,
-  setErrorMsg,
 }: {
   id: string;
   patient: Patient;
+  diagnosesInfo: Diagnosis[] | null;
   setPatient: Dispatch<SetStateAction<Patient | null>>;
-  setErrorMsg: Dispatch<SetStateAction<string>>;
 }) => {
   const [showForm, setShowForm] = useState<string>();
+  const [errorMsg, setErrorMsg] = useState<string>("");
   const displaySelectedForm = () => {
     switch (showForm) {
       case EntryType.HealthCheck:
@@ -110,6 +111,7 @@ const FormSelection = ({
           <HealthCheckForm
             id={id}
             patient={patient}
+            diagnosesInfo={diagnosesInfo}
             setPatient={setPatient}
             setErrorMsg={setErrorMsg}
           />
@@ -119,6 +121,7 @@ const FormSelection = ({
           <HostpitalForm
             id={id}
             patient={patient}
+            diagnosesInfo={diagnosesInfo}
             setPatient={setPatient}
             setErrorMsg={setErrorMsg}
           />
@@ -128,6 +131,7 @@ const FormSelection = ({
           <OccupationHealthForm
             id={id}
             patient={patient}
+            diagnosesInfo={diagnosesInfo}
             setPatient={setPatient}
             setErrorMsg={setErrorMsg}
           />
@@ -138,25 +142,28 @@ const FormSelection = ({
   };
   return (
     <>
-      <Button
-        variant="outlined"
-        onClick={() => setShowForm(EntryType.HealthCheck)}
-      >
-        Health Check Form
-      </Button>
-      <Button
-        variant="outlined"
-        onClick={() => setShowForm(EntryType.OccupationalHealthCare)}
-      >
-        Occupational Health Care Form
-      </Button>
-      <Button
-        variant="outlined"
-        onClick={() => setShowForm(EntryType.Hospital)}
-      >
-        Hospital Form
-      </Button>
-      <Container sx={{ my: "1rem" }}>{displaySelectedForm()}</Container>
+      <Box sx={{ mb: "1rem" }}>
+        <Button
+          variant="outlined"
+          onClick={() => setShowForm(EntryType.HealthCheck)}
+        >
+          Health Check Form
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => setShowForm(EntryType.OccupationalHealthCare)}
+        >
+          Occupational Health Care Form
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => setShowForm(EntryType.Hospital)}
+        >
+          Hospital Form
+        </Button>
+      </Box>
+      {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+      {displaySelectedForm()}
       {showForm && (
         <Button size="small" onClick={() => setShowForm("")}>
           Hide

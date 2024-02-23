@@ -6,15 +6,17 @@ import {
   SyntheticEvent,
   useState,
 } from "react";
-import { Entry, EntryType, Patient } from "../../types";
+import { Diagnosis, Entry, EntryType, Patient } from "../../types";
 import patientService from "../../services/patients";
 import axios, { AxiosError } from "axios";
+import DiagnosisCodeSelect from "./DiagnosisCodeSelect";
 
 interface HostpitalFormProps {
   id: Entry["id"];
   patient: Patient;
   setPatient: Dispatch<SetStateAction<Patient | null>>;
   setErrorMsg: Dispatch<SetStateAction<string>>;
+  diagnosesInfo: Diagnosis[] | null;
 }
 
 const HostpitalForm = ({
@@ -22,16 +24,19 @@ const HostpitalForm = ({
   patient,
   setPatient,
   setErrorMsg,
+  diagnosesInfo,
 }: HostpitalFormProps) => {
   const initialFormState = {
     description: "",
     date: "",
     specialist: "",
-    diagnosisCodes: "",
     dischargeDate: "",
     dischargeCriteria: "",
   };
   const [formData, setFormData] = useState(initialFormState);
+  const [diagnosisCodes, setDiagnosisCodes] = useState<
+    Array<Diagnosis["code"]>
+  >([]);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -40,13 +45,11 @@ const HostpitalForm = ({
         {
           ...formData,
           type: EntryType.Hospital,
-          diagnosisCodes: formData.diagnosisCodes
-            ? formData.diagnosisCodes?.split(",").map((c) => c.trim())
-            : [],
           discharge: {
             date: formData.date,
             criteria: formData.dischargeCriteria,
           },
+          diagnosisCodes,
         },
         id
       )
@@ -108,12 +111,10 @@ const HostpitalForm = ({
               label="Specialist"
               variant="standard"
             />
-            <TextField
-              onChange={handleChange}
-              name="diagnosisCodes"
-              value={formData.diagnosisCodes}
-              label="Diagnosis Codes"
-              variant="standard"
+            <DiagnosisCodeSelect
+              diagnosesInfo={diagnosesInfo || []}
+              diagnosisCodes={diagnosisCodes}
+              setDiagnosisCodes={setDiagnosisCodes}
             />
             <h4>Discharge</h4>
             <TextField
@@ -123,13 +124,6 @@ const HostpitalForm = ({
               type="date"
               variant="standard"
             />
-            <TextField
-              onChange={handleChange}
-              name="dischargeCriteria"
-              value={formData.dischargeCriteria}
-              label="Criteria"
-              variant="standard"
-            />
             <br />
             <Box sx={{ display: "flex", gap: "1rem" }}>
               <Button type="submit" variant="contained">
@@ -137,7 +131,10 @@ const HostpitalForm = ({
               </Button>
               <Button
                 variant="contained"
-                onClick={() => setFormData(initialFormState)}
+                onClick={() => {
+                  setFormData(initialFormState);
+                  setDiagnosisCodes([]);
+                }}
                 color="error"
               >
                 Cancel

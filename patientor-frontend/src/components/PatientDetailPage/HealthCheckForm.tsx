@@ -6,15 +6,23 @@ import {
   SyntheticEvent,
   useState,
 } from "react";
-import { Entry, EntryType, HealthCheckRating, Patient } from "../../types";
+import {
+  Diagnosis,
+  Entry,
+  EntryType,
+  HealthCheckRating,
+  Patient,
+} from "../../types";
 import patientService from "../../services/patients";
 import axios, { AxiosError } from "axios";
+import DiagnosisCodeSelect from "./DiagnosisCodeSelect";
 
 interface HealthCheckFormProps {
   id: Entry["id"];
   patient: Patient;
   setPatient: Dispatch<SetStateAction<Patient | null>>;
   setErrorMsg: Dispatch<SetStateAction<string>>;
+  diagnosesInfo: Diagnosis[] | null;
 }
 
 const HealthCheckForm = ({
@@ -22,16 +30,20 @@ const HealthCheckForm = ({
   patient,
   setPatient,
   setErrorMsg,
+  diagnosesInfo,
 }: HealthCheckFormProps) => {
   const initialFormState = {
     description: "",
     date: "",
     specialist: "",
-    diagnosisCodes: "",
+    diagnosisCodes: [] as Array<Diagnosis["code"]>,
     healthCheckRating: HealthCheckRating.Healthy,
   };
 
   const [formData, setFormData] = useState(initialFormState);
+  const [diagnosisCodes, setDiagnosisCodes] = useState<
+    Array<Diagnosis["code"]>
+  >([]);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -41,9 +53,7 @@ const HealthCheckForm = ({
           ...formData,
           type: EntryType.HealthCheck,
           healthCheckRating: Number(formData.healthCheckRating),
-          diagnosisCodes: formData.diagnosisCodes
-            ? formData.diagnosisCodes?.split(",").map((c) => c.trim())
-            : [],
+          diagnosisCodes,
         },
         id
       )
@@ -113,12 +123,10 @@ const HealthCheckForm = ({
               variant="standard"
               type="number"
             />
-            <TextField
-              onChange={handleChange}
-              name="diagnosisCodes"
-              value={formData.diagnosisCodes}
-              label="Diagnosis Codes"
-              variant="standard"
+            <DiagnosisCodeSelect
+              diagnosesInfo={diagnosesInfo || []}
+              diagnosisCodes={diagnosisCodes}
+              setDiagnosisCodes={setDiagnosisCodes}
             />
             <br />
             <Box sx={{ display: "flex", gap: "1rem" }}>
@@ -127,7 +135,10 @@ const HealthCheckForm = ({
               </Button>
               <Button
                 variant="contained"
-                onClick={() => setFormData(initialFormState)}
+                onClick={() => {
+                  setFormData(initialFormState);
+                  setDiagnosisCodes([]);
+                }}
                 color="error"
               >
                 Cancel
