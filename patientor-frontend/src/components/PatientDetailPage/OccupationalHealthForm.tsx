@@ -63,6 +63,7 @@ const OccupationHealth = ({
           entries: patient.entries.concat(addedEntry),
         });
         setFormData(initialFormState);
+        setDiagnosisCodes([]);
       })
       .catch((error: Error | AxiosError) => {
         if (axios.isAxiosError(error)) {

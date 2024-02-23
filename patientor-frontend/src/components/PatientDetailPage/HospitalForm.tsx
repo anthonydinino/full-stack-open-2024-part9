@@ -59,6 +59,7 @@ const HostpitalForm = ({
           entries: patient.entries.concat(addedEntry),
         });
         setFormData(initialFormState);
+        setDiagnosisCodes([]);
       })
       .catch((error: Error | AxiosError) => {
         if (axios.isAxiosError(error)) {
@@ -122,6 +123,13 @@ const HostpitalForm = ({
               name="dischargeDate"
               value={formData.dischargeDate}
               type="date"
+              variant="standard"
+            />
+            <TextField
+              onChange={handleChange}
+              name="dischargeCriteria"
+              value={formData.dischargeCriteria}
+              label="Criteria"
               variant="standard"
             />
             <br />

@@ -36,7 +36,6 @@ const HealthCheckForm = ({
     description: "",
     date: "",
     specialist: "",
-    diagnosisCodes: [] as Array<Diagnosis["code"]>,
     healthCheckRating: HealthCheckRating.Healthy,
   };
 
@@ -63,6 +62,7 @@ const HealthCheckForm = ({
           entries: patient.entries.concat(addedEntry),
         });
         setFormData(initialFormState);
+        setDiagnosisCodes([]);
       })
       .catch((error: Error | AxiosError) => {
         if (axios.isAxiosError(error)) {
