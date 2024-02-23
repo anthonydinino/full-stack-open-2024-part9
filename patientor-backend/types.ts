@@ -42,6 +42,7 @@ interface HealthCheckEntry extends BaseEntry {
 
 interface OccupationalHealthCareEntry extends BaseEntry {
   employerName: string;
+  occupation: string;
   sickLeave: SickLeave;
   type: EntryType.OccupationalHealthCare;
 }
