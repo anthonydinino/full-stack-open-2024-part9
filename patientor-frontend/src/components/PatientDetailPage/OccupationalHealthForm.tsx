@@ -6,31 +6,33 @@ import {
   SyntheticEvent,
   useState,
 } from "react";
-import { Entry, EntryType, HealthCheckRating, Patient } from "../../types";
+import { Entry, EntryType, Patient } from "../../types";
 import patientService from "../../services/patients";
 import axios, { AxiosError } from "axios";
 
-interface HealthCheckFormProps {
+interface OccupationHealthProps {
   id: Entry["id"];
   patient: Patient;
   setPatient: Dispatch<SetStateAction<Patient | null>>;
   setErrorMsg: Dispatch<SetStateAction<string>>;
 }
 
-const HealthCheckForm = ({
+const OccupationHealth = ({
   id,
   patient,
   setPatient,
   setErrorMsg,
-}: HealthCheckFormProps) => {
+}: OccupationHealthProps) => {
   const initialFormState = {
+    occupation: patient.occupation || "",
+    employeeName: "",
     description: "",
     date: "",
     specialist: "",
     diagnosisCodes: "",
-    healthCheckRating: HealthCheckRating.Healthy,
+    sickLeaveStart: "",
+    sickLeaveEnd: "",
   };
-
   const [formData, setFormData] = useState(initialFormState);
 
   const handleSubmit = (e: SyntheticEvent) => {
@@ -39,11 +41,16 @@ const HealthCheckForm = ({
       .addEntry(
         {
           ...formData,
-          type: EntryType.HealthCheck,
-          healthCheckRating: Number(formData.healthCheckRating),
+          type: EntryType.OccupationalHealthCare,
+          occupation: formData.occupation,
+          employerName: formData.employeeName,
           diagnosisCodes: formData.diagnosisCodes
             ? formData.diagnosisCodes?.split(",").map((c) => c.trim())
             : [],
+          sickLeave: {
+            startDate: formData.sickLeaveStart,
+            endDate: formData.sickLeaveEnd,
+          },
         },
         id
       )
@@ -83,7 +90,7 @@ const HealthCheckForm = ({
       >
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth sx={{ gap: "0.5rem" }}>
-            <h4>New HealthCheck Entry</h4>
+            <h4>New Occupational Health Entry</h4>
             <TextField
               onChange={handleChange}
               name="description"
@@ -100,6 +107,20 @@ const HealthCheckForm = ({
             />
             <TextField
               onChange={handleChange}
+              name="occupation"
+              value={formData.occupation}
+              label="Occupation"
+              variant="standard"
+            />
+            <TextField
+              onChange={handleChange}
+              name="employeeName"
+              value={formData.employeeName}
+              label="Employee Name"
+              variant="standard"
+            />
+            <TextField
+              onChange={handleChange}
               name="specialist"
               value={formData.specialist}
               label="Specialist"
@@ -107,17 +128,26 @@ const HealthCheckForm = ({
             />
             <TextField
               onChange={handleChange}
-              name="healthCheckRating"
-              value={formData.healthCheckRating}
-              label="Health Check Rating"
-              variant="standard"
-              type="number"
-            />
-            <TextField
-              onChange={handleChange}
               name="diagnosisCodes"
               value={formData.diagnosisCodes}
               label="Diagnosis Codes"
+              variant="standard"
+            />
+            <h4>Sick Leave</h4>
+            <p>Sick Leave Start Date:</p>
+            <TextField
+              onChange={handleChange}
+              name="sickLeaveStart"
+              value={formData.sickLeaveStart}
+              type="date"
+              variant="standard"
+            />
+            <p>Sick Leave End Date:</p>
+            <TextField
+              onChange={handleChange}
+              name="sickLeaveEnd"
+              value={formData.sickLeaveEnd}
+              type="date"
               variant="standard"
             />
             <br />
@@ -141,4 +171,4 @@ const HealthCheckForm = ({
   );
 };
 
-export default HealthCheckForm;
+export default OccupationHealth;

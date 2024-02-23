@@ -1,20 +1,30 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import patientService from "../../services/patients";
 import diagnosesService from "../../services/diagnoses";
-import { Diagnosis, Gender, Patient } from "../../types";
-import { Avatar, Card, Container, Typography } from "@mui/material";
+import { Diagnosis, EntryType, Gender, Patient } from "../../types";
+import {
+  Alert,
+  Avatar,
+  Button,
+  Card,
+  Container,
+  Typography,
+} from "@mui/material";
 import FemaleIcon from "@mui/icons-material/Female";
 import MaleIcon from "@mui/icons-material/Male";
 import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import EntryDetails from "./EntryDetails";
 import HealthCheckForm from "./HealthCheckForm";
+import HostpitalForm from "./HospitalForm";
+import OccupationHealthForm from "./OccupationalHealthForm";
 
 const PatientDetailPage = () => {
   const params = useParams();
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [diagnosesInfo, setDiagnosesInfo] = useState<Diagnosis[] | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   useEffect(() => {
     patientService.getOne(params.id || "").then((data) => {
@@ -52,10 +62,12 @@ const PatientDetailPage = () => {
         <p>ssn: {patient.ssn}</p>
         <p>occupation: {patient.occupation}</p>
       </Container>
-      <HealthCheckForm
+      {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+      <FormSelection
         id={params.id}
         patient={patient}
         setPatient={setPatient}
+        setErrorMsg={setErrorMsg}
       />
       <Container>
         <Typography variant="h5" component="h5">
@@ -76,6 +88,81 @@ const PatientDetailPage = () => {
         )}
       </Container>
     </Card>
+  );
+};
+
+const FormSelection = ({
+  id,
+  patient,
+  setPatient,
+  setErrorMsg,
+}: {
+  id: string;
+  patient: Patient;
+  setPatient: Dispatch<SetStateAction<Patient | null>>;
+  setErrorMsg: Dispatch<SetStateAction<string>>;
+}) => {
+  const [showForm, setShowForm] = useState<string>();
+  const displaySelectedForm = () => {
+    switch (showForm) {
+      case EntryType.HealthCheck:
+        return (
+          <HealthCheckForm
+            id={id}
+            patient={patient}
+            setPatient={setPatient}
+            setErrorMsg={setErrorMsg}
+          />
+        );
+      case EntryType.Hospital:
+        return (
+          <HostpitalForm
+            id={id}
+            patient={patient}
+            setPatient={setPatient}
+            setErrorMsg={setErrorMsg}
+          />
+        );
+      case EntryType.OccupationalHealthCare:
+        return (
+          <OccupationHealthForm
+            id={id}
+            patient={patient}
+            setPatient={setPatient}
+            setErrorMsg={setErrorMsg}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+  return (
+    <>
+      <Button
+        variant="outlined"
+        onClick={() => setShowForm(EntryType.HealthCheck)}
+      >
+        Health Check Form
+      </Button>
+      <Button
+        variant="outlined"
+        onClick={() => setShowForm(EntryType.OccupationalHealthCare)}
+      >
+        Occupational Health Care Form
+      </Button>
+      <Button
+        variant="outlined"
+        onClick={() => setShowForm(EntryType.Hospital)}
+      >
+        Hospital Form
+      </Button>
+      <Container sx={{ my: "1rem" }}>{displaySelectedForm()}</Container>
+      {showForm && (
+        <Button size="small" onClick={() => setShowForm("")}>
+          Hide
+        </Button>
+      )}
+    </>
   );
 };
 

@@ -60,6 +60,7 @@ export const toNewEntry = (obj: unknown): NewEntry => {
       return {
         ...baseEntry,
         type: typedObj.type,
+        occupation: parseString(typedObj.occupation, "occupation"),
         employerName: parseString(typedObj.employerName, "employerName"),
         sickLeave: parseSickLeave(typedObj.sickLeave),
       };
@@ -126,7 +127,8 @@ const parseHealthCheckRating = (object: unknown): HealthCheckRating => {
 };
 
 const parseDiagnosisCodes = (object: unknown): Array<Diagnosis["code"]> => {
-  if (!Array.isArray(object)) return [] as Array<Diagnosis["code"]>;
+  if (!Array.isArray(object)) 
+    return [] as Array<Diagnosis["code"]>;
   return object as Array<Diagnosis["code"]>;
 };
 

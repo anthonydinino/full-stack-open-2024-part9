@@ -6,31 +6,31 @@ import {
   SyntheticEvent,
   useState,
 } from "react";
-import { Entry, EntryType, HealthCheckRating, Patient } from "../../types";
+import { Entry, EntryType, Patient } from "../../types";
 import patientService from "../../services/patients";
 import axios, { AxiosError } from "axios";
 
-interface HealthCheckFormProps {
+interface HostpitalFormProps {
   id: Entry["id"];
   patient: Patient;
   setPatient: Dispatch<SetStateAction<Patient | null>>;
   setErrorMsg: Dispatch<SetStateAction<string>>;
 }
 
-const HealthCheckForm = ({
+const HostpitalForm = ({
   id,
   patient,
   setPatient,
   setErrorMsg,
-}: HealthCheckFormProps) => {
+}: HostpitalFormProps) => {
   const initialFormState = {
     description: "",
     date: "",
     specialist: "",
     diagnosisCodes: "",
-    healthCheckRating: HealthCheckRating.Healthy,
+    dischargeDate: "",
+    dischargeCriteria: "",
   };
-
   const [formData, setFormData] = useState(initialFormState);
 
   const handleSubmit = (e: SyntheticEvent) => {
@@ -39,11 +39,14 @@ const HealthCheckForm = ({
       .addEntry(
         {
           ...formData,
-          type: EntryType.HealthCheck,
-          healthCheckRating: Number(formData.healthCheckRating),
+          type: EntryType.Hospital,
           diagnosisCodes: formData.diagnosisCodes
             ? formData.diagnosisCodes?.split(",").map((c) => c.trim())
             : [],
+          discharge: {
+            date: formData.date,
+            criteria: formData.dischargeCriteria,
+          },
         },
         id
       )
@@ -83,7 +86,7 @@ const HealthCheckForm = ({
       >
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth sx={{ gap: "0.5rem" }}>
-            <h4>New HealthCheck Entry</h4>
+            <h4>New Hospital Entry</h4>
             <TextField
               onChange={handleChange}
               name="description"
@@ -107,17 +110,24 @@ const HealthCheckForm = ({
             />
             <TextField
               onChange={handleChange}
-              name="healthCheckRating"
-              value={formData.healthCheckRating}
-              label="Health Check Rating"
-              variant="standard"
-              type="number"
-            />
-            <TextField
-              onChange={handleChange}
               name="diagnosisCodes"
               value={formData.diagnosisCodes}
               label="Diagnosis Codes"
+              variant="standard"
+            />
+            <h4>Discharge</h4>
+            <TextField
+              onChange={handleChange}
+              name="dischargeDate"
+              value={formData.dischargeDate}
+              type="date"
+              variant="standard"
+            />
+            <TextField
+              onChange={handleChange}
+              name="dischargeCriteria"
+              value={formData.dischargeCriteria}
+              label="Criteria"
               variant="standard"
             />
             <br />
@@ -141,4 +151,4 @@ const HealthCheckForm = ({
   );
 };
 
-export default HealthCheckForm;
+export default HostpitalForm;
